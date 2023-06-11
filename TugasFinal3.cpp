@@ -1,13 +1,13 @@
 #include <GL/glut.h>
 
 // Variables for animation
-float translationZ = 0.0f;
+float translationZ = -10.0f;
 float translationSpeed = 0.05f;
 float splitTranslation = 0.0f;
 float splitSpeed = 0.01f;
 float rotationAngleTop = 0.0f;
 float rotationAngleBottom = 0.0f;
-float rotationSpeed = 1.0f;
+float rotationSpeed = 0.2f;
 
 // Function for drawing the octahedron
 void drawOctahedron() {
@@ -20,8 +20,6 @@ void drawOctahedron() {
     // Draw the wireframe octahedron
     glBegin(GL_LINES);
     // Top pyramid
-    glPushMatrix();
-    glRotatef(rotationAngleTop, 0.0f, 1.0f, 0.0f);
     glVertex3f(0.0f, 1.0f + offset, 0.0f);
     glVertex3f(1.0f, 0.0f + offset, 0.0f);
     glVertex3f(0.0f, 1.0f + offset, 0.0f);
@@ -30,11 +28,7 @@ void drawOctahedron() {
     glVertex3f(0.0f, 0.0f + offset, 1.0f);
     glVertex3f(0.0f, 1.0f + offset, 0.0f);
     glVertex3f(0.0f, 0.0f + offset, -1.0f);
-    glPopMatrix();
-
     // Bottom pyramid
-    glPushMatrix();
-    glRotatef(rotationAngleBottom, 0.0f, -1.0f, 0.0f);
     glVertex3f(0.0f, -1.0f - offset, 0.0f);
     glVertex3f(1.0f, 0.0f - offset, 0.0f);
     glVertex3f(0.0f, -1.0f - offset, 0.0f);
@@ -43,9 +37,7 @@ void drawOctahedron() {
     glVertex3f(0.0f, 0.0f - offset, 1.0f);
     glVertex3f(0.0f, -1.0f - offset, 0.0f);
     glVertex3f(0.0f, 0.0f - offset, -1.0f);
-    glPopMatrix();
-
-    // Side edges for top 
+    // Side edges for top
     glVertex3f(1.0f, 0.0f + offset, 0.0f);
     glVertex3f(0.0f, 0.0f + offset, 1.0f);
     glVertex3f(-1.0f, 0.0f + offset, 0.0f);
@@ -54,7 +46,6 @@ void drawOctahedron() {
     glVertex3f(0.0f, 0.0f + offset, -1.0f);
     glVertex3f(-1.0f, 0.0f + offset, 0.0f);
     glVertex3f(0.0f, 0.0f + offset, -1.0f);
-
     // Side edges for bottom
     glVertex3f(1.0f, 0.0f - offset, 0.0f);
     glVertex3f(0.0f, 0.0f - offset, 1.0f);
@@ -77,8 +68,23 @@ void display() {
     // Translate the object
     glTranslatef(0.0f, 0.0f, translationZ);
 
-    // Draw the octahedron
+    // Rotate the entire object
+    glRotatef(rotationAngleTop, 0.0f, 1.0f, 0.0f);
+
+    // Draw the top pyramid
     drawOctahedron();
+
+    // Save the current matrix
+    glPushMatrix();
+
+    // Rotate the bottom pyramid
+    glRotatef(rotationAngleBottom, 0.0f, 1.0f, 0.0f);
+
+    // Draw the bottom pyramid
+    drawOctahedron();
+
+    // Restore the matrix
+    glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -86,19 +92,19 @@ void display() {
 // Function for updating the scene
 void update(int value) {
     // Update the translation along the z-axis
-    translationZ -= translationSpeed;
+    translationZ += translationSpeed;
 
     // Reverse the translation direction if reaching the desired position
-    if (translationZ < -10.0f)
-        translationSpeed = 0.0f;
+    if (translationZ > 0.0f)
+        translationSpeed *= -1.0f;
 
     // Update the split translation
     splitTranslation += splitSpeed;
 
     // Reverse the split translation direction if reaching the desired position
     if (splitTranslation > 0.5f || splitTranslation < -0.5f)
-        splitSpeed = 0.0f;
-    
+        splitSpeed *= 0.0f;
+
     // Update the rotation angles
     rotationAngleTop += rotationSpeed;
     rotationAngleBottom -= rotationSpeed;
@@ -111,28 +117,22 @@ void update(int value) {
 }
 
 int main(int argc, char** argv) {
-    // Initialize GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(800, 600);
     glutCreateWindow("Splitting Octahedron");
 
-    // Enable depth testing for 3D rendering
     glEnable(GL_DEPTH_TEST);
 
-    // Set the clear color to black
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-    // Set the projection matrix
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0, 800.0 / 600.0, 1.0, 100.0);
 
-    // Register callback functions
     glutDisplayFunc(display);
     glutTimerFunc(0, update, 0);
 
-    // Start the main loop
     glutMainLoop();
 
     return 0;
