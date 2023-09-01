@@ -1,7 +1,3 @@
-'''
-Buatlah program grafik utk membuat gambar objek 3D original karya saudara yg dilengkapi animasinya. Yg diupload data objek 3D, coding dan video running program nya dlm bentuk zip atau rar
-'''
-
 import pygame
 from pygame.locals import *
 
